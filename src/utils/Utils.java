@@ -22,7 +22,6 @@ import com.intellij.psi.xml.XmlAttribute;
 import com.intellij.psi.xml.XmlTag;
 import com.intellij.ui.awt.RelativePoint;
 import entity.Element;
-import form.Settings;
 
 import java.util.ArrayList;
 

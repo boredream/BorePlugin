@@ -127,7 +127,7 @@ public class LayoutCreator extends WriteCommandAction.Simple {
                 continue;
             }
 
-            mClass.add(mFactory.createFieldFromText("private " + element.getElementName() + " " + element.getId() + ";", mClass));
+            mClass.add(mFactory.createFieldFromText("private " + element.name + " " + element.fieldName + ";", mClass));
         }
     }
 
@@ -175,8 +175,8 @@ public class LayoutCreator extends WriteCommandAction.Simple {
                                     continue;
                                 }
 
-                                initView.append(element.getId() + " = " +
-                                        "(" + element.getElementName() + ") findViewById(" + element.getFullID() + ");\n");
+                                initView.append(element.fieldName + " = " +
+                                        "(" + element.name + ") findViewById(" + element.getFullID() + ");\n");
 
                                 // set flag
                                 if (!hasClickable) {
@@ -218,7 +218,7 @@ public class LayoutCreator extends WriteCommandAction.Simple {
                                     }
 
                                     // generator setOnClickListener code in initView()
-                                    initView.append(element.getId() + ".setOnClickListener(this);\n");
+                                    initView.append(element.fieldName + ".setOnClickListener(this);\n");
 
                                     // generator override public void onClick(View v) method
                                     clickable.append("case " + element.getFullID() + " :\n\nbreak;\n");
@@ -264,8 +264,8 @@ public class LayoutCreator extends WriteCommandAction.Simple {
                         } else {
                             StringBuilder findViewById = new StringBuilder();
                             for (Element element : mElements) {
-                                findViewById.append(element.getId() + " = " +
-                                        "(" + element.getElementName() + ") findViewById(" + element.getFullID() + ");\n");
+                                findViewById.append(element.fieldName + " = " +
+                                        "(" + element.name + ") findViewById(" + element.getFullID() + ");\n");
                             }
                             onCreateView.getBody().addAfter(mFactory.createStatementFromText(findViewById.toString(), mClass), statement);
                             break;

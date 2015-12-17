@@ -27,7 +27,6 @@ public class EntryList extends JPanel {
     protected ICancelListener mCancelListener;
     protected JCheckBox mPrefixCheck;
     protected JTextField mPrefixValue;
-    protected JLabel mPrefixLabel;
     protected JCheckBox mHolderCheck;
     protected JLabel mHolderLabel;
     protected JButton mConfirm;
@@ -87,27 +86,6 @@ public class EntryList extends JPanel {
     }
 
     protected void addButtons() {
-        /*
-		mPrefixCheck = new JCheckBox();
-		mPrefixCheck.setPreferredSize(new Dimension(32, 26));
-		mPrefixCheck.addChangeListener(new CheckPrefixListener());
-
-		mPrefixValue = new JTextField(Utils.getPrefix(), 10);
-		mPrefixValue.setPreferredSize(new Dimension(40, 26));
-
-		mPrefixLabel = new JLabel();
-		mPrefixLabel.setText("Field name prefix");
-
-		JPanel prefixPanel = new JPanel();
-		prefixPanel.setLayout(new BoxLayout(prefixPanel, BoxLayout.LINE_AXIS));
-		prefixPanel.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 10));
-		prefixPanel.add(mPrefixCheck);
-		prefixPanel.add(mPrefixValue);
-		prefixPanel.add(mPrefixLabel);
-		prefixPanel.add(Box.createHorizontalGlue());
-		add(prefixPanel, BorderLayout.PAGE_END);
-		*/
-
         mHolderCheck = new JCheckBox();
         mHolderCheck.setPreferredSize(new Dimension(32, 26));
         mHolderCheck.setSelected(mCreateHolder);
@@ -116,16 +94,12 @@ public class EntryList extends JPanel {
         mHolderLabel = new JLabel();
         mHolderLabel.setText("Create ViewHolder");
 
-        JLabel settingsInfo = new JLabel();
-        settingsInfo.setText("(You can configure this plugin in Preferences)");
-
         JPanel holderPanel = new JPanel();
         holderPanel.setLayout(new BoxLayout(holderPanel, BoxLayout.LINE_AXIS));
         holderPanel.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 10));
         holderPanel.add(mHolderCheck);
         holderPanel.add(mHolderLabel);
         holderPanel.add(Box.createHorizontalGlue());
-        holderPanel.add(settingsInfo);
         add(holderPanel, BorderLayout.PAGE_END);
 
         mCancel = new JButton();

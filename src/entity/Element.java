@@ -53,10 +53,6 @@ public class Element {
         this.fieldName = getFieldName();
     }
 
-    public String getId() {
-        return id;
-    }
-
     /**
      * Create full ID for using in layout XML files
      *
@@ -78,35 +74,34 @@ public class Element {
         return fullID.toString();
     }
 
-    public String getElementName() {
-        return name;
-    }
-
     /**
      * Generate field name if it's not done yet
      *
      * @return
      */
     private String getFieldName() {
-        String[] words = this.id.split("_");
-        StringBuilder sb = new StringBuilder();
-        sb.append(Utils.getPrefix());
+//        String[] words = this.id.split("_");
+//        StringBuilder sb = new StringBuilder();
+//        sb.append(Utils.getPrefix());
+//
+//        for (int i = 0; i < words.length; i++) {
+//            if (words[i].isEmpty()) {
+//                // fixing issues with double underscores - see issue #40
+//                continue;
+//            }
+//            String[] idTokens = words[i].split("\\.");
+//            char[] chars = idTokens[idTokens.length - 1].toCharArray();
+//            if (i > 0 || !Utils.isEmptyString(Utils.getPrefix())) {
+//                chars[0] = Character.toUpperCase(chars[0]);
+//            }
+//
+//            sb.append(chars);
+//        }
+//
+//        return sb.toString();
 
-        for (int i = 0; i < words.length; i++) {
-            if (words[i].isEmpty()) {
-                // fixing issues with double underscores - see issue #40
-                continue;
-            }
-            String[] idTokens = words[i].split("\\.");
-            char[] chars = idTokens[idTokens.length - 1].toCharArray();
-            if (i > 0 || !Utils.isEmptyString(Utils.getPrefix())) {
-                chars[0] = Character.toUpperCase(chars[0]);
-            }
-
-            sb.append(chars);
-        }
-
-        return sb.toString();
+        // TODO
+        return id;
     }
 
     /**

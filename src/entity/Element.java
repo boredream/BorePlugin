@@ -17,7 +17,6 @@ public class Element {
     public String fieldName; // name of variable
     public boolean isValid = false;
     public boolean used = true;
-    public boolean isCheckable = false; // Checkbox, RadioButton etc.
     public boolean isClickable = false; // Button, view_having_clickable_attr etc.
 
     /**
@@ -120,14 +119,6 @@ public class Element {
         isValid = matcher.find();
 
         return isValid;
-    }
-
-    public boolean isCheckable() {
-        return isCheckable;
-    }
-
-    public void setCheckable(boolean checkable) {
-        isCheckable = checkable;
     }
 
     public boolean isClickable() {

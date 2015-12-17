@@ -127,10 +127,7 @@ public class LayoutCreator extends WriteCommandAction.Simple {
                 continue;
             }
 
-            StringBuilder sb = new StringBuilder();
-            sb.append("private " + element.getElementName() + " " + element.getId() + ";");
-
-            mClass.add(mFactory.createFieldFromText(sb.toString(), mClass));
+            mClass.add(mFactory.createFieldFromText("private " + element.getElementName() + " " + element.getId() + ";", mClass));
         }
     }
 
@@ -168,26 +165,74 @@ public class LayoutCreator extends WriteCommandAction.Simple {
                             onCreate.getBody().addAfter(mFactory.createStatementFromText("initView();", mClass), statement);
 
                             // generator findViewById code in initView() method
-                            StringBuilder findViewById = new StringBuilder();
-                            findViewById.append("private void initView() {\n");
+                            StringBuilder initView = new StringBuilder();
+                            initView.append("private void initView() {\n");
 
                             boolean hasClickable = false;
-                            StringBuilder clickable = new StringBuilder();
+                            boolean hasCheckable = false;
                             for (Element element : mElements) {
-                                findViewById.append(element.getId() + " = " +
+                                if (!element.used) {
+                                    continue;
+                                }
+
+                                initView.append(element.getId() + " = " +
                                         "(" + element.getElementName() + ") findViewById(" + element.getFullID() + ");\n");
 
                                 // set flag
-                                if(!hasClickable) {
+                                if (!hasClickable) {
                                     hasClickable = element.isClickable();
                                 }
-                                // generator setXXXListener
-                                if(element.isClickable()) {
-                                    clickable.append(element.getElementName() + ".setOnClickListener(this);\n");
-                                }
                             }
-                            findViewById.append("}");
-                            mClass.add(mFactory.createMethodFromText(findViewById.toString(), mClass));
+
+                            // generator clickable code if need
+                            StringBuilder clickable = new StringBuilder();
+                            if(hasClickable) {
+                                // let class implement OnClickListener
+                                PsiReferenceList implementsList = mClass.getImplementsList();
+                                if(implementsList != null) {
+                                    PsiJavaCodeReferenceElement[] referenceElements = implementsList.getReferenceElements();
+                                    boolean hasImpl = false;
+                                    for(PsiJavaCodeReferenceElement re : referenceElements) {
+                                        hasImpl = re.getText().contains("OnClickListener");
+                                    }
+                                    // add implement if not exist
+                                    if(!hasImpl) {
+                                        PsiJavaCodeReferenceElement pjcre = mFactory.createReferenceElementByFQClassName(
+                                                "OnClickListener", mClass.getResolveScope());
+                                        implementsList.add(pjcre);
+                                    }
+                                }
+
+                                if(implementsList != null &&
+                                        (implementsList.getText() != null && implementsList.getText().contains("OnClickListener"))) {
+                                }
+
+                                initView.append("\n");
+
+                                clickable.append("@Override public void onClick(View v) {\n")
+                                        .append("switch (v.getId()) {\n");
+
+                                for (Element element : mElements) {
+                                    if (!element.used || !element.isClickable()) {
+                                        continue;
+                                    }
+
+                                    // generator setOnClickListener code in initView()
+                                    initView.append(element.getId() + ".setOnClickListener(this);\n");
+
+                                    // generator override public void onClick(View v) method
+                                    clickable.append("case " + element.getFullID() + " :\n\nbreak;\n");
+                                }
+
+                                clickable.append("}\n}");
+                            }
+
+                            initView.append("}");
+                            mClass.add(mFactory.createMethodFromText(initView.toString(), mClass));
+
+                            if(hasClickable) {
+                                mClass.add(mFactory.createMethodFromText(clickable.toString(), mClass));
+                            }
                             break;
                         }
                     }

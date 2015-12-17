@@ -181,12 +181,13 @@ public class Utils {
                         return; // empty value
                     }
 
-                    // button attr
-                    boolean isCheckable = false;
+                    // clickable
                     boolean isClickable = false;
+                    XmlAttribute clickable = tag.getAttribute("android:clickable", null);
                     if(tag.getName().contains("RadioButton")) {
-                        isCheckable = true;
-                    } else if(tag.getName().contains("Button")) {
+                        // TODO
+                    } else if (tag.getName().contains("Button")
+                            || (clickable != null && clickable.getValue() != null && clickable.getValue().equals("true"))) {
                         isClickable = true;
                     }
 
@@ -199,7 +200,6 @@ public class Utils {
 
                     try {
                         Element e = new Element(name, value);
-                        e.setCheckable(isCheckable);
                         e.setClickable(isClickable);
                         elements.add(e);
                     } catch (IllegalArgumentException e) {

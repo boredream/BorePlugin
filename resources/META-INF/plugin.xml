@@ -1,16 +1,16 @@
 <idea-plugin version="2">
     <id>com.your.company.unique.plugin.id</id>
-    <name>Plugin display name here</name>
+    <name>LayoutCreator</name>
     <version>1.0</version>
     <vendor email="support@yourcompany.com" url="http://www.yourcompany.com">YourCompany</vendor>
 
     <description><![CDATA[
-      Enter short description for your plugin here.<br>
+      auto generator findViewById code in Activity or Adapter(ViewHolder).<br>
       <em>most HTML tags may be used</em>
     ]]></description>
 
     <change-notes><![CDATA[
-      Add change notes here.<br>
+      first version<br>
       <em>most HTML tags may be used</em>
     ]]>
     </change-notes>

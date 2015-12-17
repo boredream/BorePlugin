@@ -127,17 +127,17 @@ public class LayoutCreatorAction extends BaseGenerateAction implements IConfirmL
         String[] annotations;
         String id;
 
-        int i=0; // FIXME
-        for (PsiField field : fields) {
-            annotations = field.getFirstChild().getText().split(" ");
-
-            for (String annotation : annotations) {
-                id = "id" + i ++; // FIXME
-                if (!Utils.isEmptyString(id)) {
-                    ids.add(id);
-                }
-            }
-        }
+//        int i=0; // FIXME
+//        for (PsiField field : fields) {
+//            annotations = field.getFirstChild().getText().split(" ");
+//
+//            for (String annotation : annotations) {
+//                id = "id" + i ++; // FIXME
+//                if (!Utils.isEmptyString(id)) {
+//                    ids.add(id);
+//                }
+//            }
+//        }
 
         EntryList panel = new EntryList(project, editor, elements, ids, createHolder, this, this);
 

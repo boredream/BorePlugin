@@ -38,7 +38,7 @@ public class LayoutCreator extends WriteCommandAction.Simple {
     @Override
     public void run() throws Throwable {
         if (mCreateHolder) {
-//            generateAdapter(butterKnife);
+            generateAdapter();
         } else {
             generateFields();
             generateFindViewById();
@@ -51,72 +51,45 @@ public class LayoutCreator extends WriteCommandAction.Simple {
         new ReformatCodeProcessor(mProject, mClass.getContainingFile(), null, false).runWithoutProgress();
     }
 
-//    /**
-//     * Create ViewHolder for adapters with injections
-//     */
-//    protected void generateAdapter() {
-//        // view holder class
-//        StringBuilder holderBuilder = new StringBuilder();
-//        holderBuilder.append(Utils.getViewHolderClassName());
-//        holderBuilder.append("(android.view.View view) {");
-//        holderBuilder.append(butterKnife.getCanonicalBindStatement());
-//        holderBuilder.append("(this, view);");
-//        holderBuilder.append("}");
-//
-//        PsiClass viewHolder = mFactory.createClassFromText(holderBuilder.toString(), mClass);
-//        viewHolder.setName(Utils.getViewHolderClassName());
-//
-//        // add injections into view holder
-//        for (Element element : mElements) {
-//            if (!element.used) {
-//                continue;
-//            }
-//
-//            String rPrefix;
-//            if (element.isAndroidNS) {
-//                rPrefix = "android.R.id.";
-//            } else {
-//                rPrefix = "R.id.";
-//            }
-//
-//            StringBuilder injection = new StringBuilder();
-//            injection.append('@');
-//            injection.append(butterKnife.getFieldAnnotationCanonicalName());
-//            injection.append('(');
-//            injection.append(rPrefix);
-//            injection.append(element.id);
-//            injection.append(") ");
-//            if (element.nameFull != null && element.nameFull.length() > 0) { // custom package+class
-//                injection.append(element.nameFull);
-//            } else if (Definitions.paths.containsKey(element.name)) { // listed class
-//                injection.append(Definitions.paths.get(element.name));
-//            } else { // android.widget
-//                injection.append("android.widget.");
-//                injection.append(element.name);
-//            }
-//            injection.append(" ");
-//            injection.append(element.fieldName);
-//            injection.append(";");
-//
-//            viewHolder.add(mFactory.createFieldFromText(injection.toString(), mClass));
-//        }
-//
-//        mClass.add(viewHolder);
-//
-//        // add view holder's comment
-//        StringBuilder comment = new StringBuilder();
-//        comment.append("/**\n");
-//        comment.append(" * This class contains all butterknife-injected Views & Layouts from layout file '");
-//        comment.append(mLayoutFileName);
-//        comment.append("'\n");
-//        comment.append("* for easy to all layout elements.\n");
-//        comment.append(" *\n");
-//        comment.append(" * @author\tButterKnifeZelezny, plugin for Android Studio by Avast Developers (http://github.com/avast)\n");
-//        comment.append("*/");
-//
-//        mClass.addBefore(mFactory.createCommentFromText(comment.toString(), mClass), mClass.findInnerClassByName(Utils.getViewHolderClassName(), true));
-//        mClass.addBefore(mFactory.createKeyword("static", mClass), mClass.findInnerClassByName(Utils.getViewHolderClassName(), true));
-//    }
+    /**
+     * Create ViewHolder for adapters with injections
+     */
+    protected void generateAdapter() {
+        // view holder class
+        String holderClassName = Utils.getViewHolderClassName();
+        StringBuilder holderBuilder = new StringBuilder();
+
+        // generator of view holder class
+        StringBuilder generator = new StringBuilder();
+        generator.append("public " + holderClassName + "(android.view.View rootView) {\n");
+
+        // rootView
+        String rootViewName = "rootView";
+        holderBuilder.append("public " + "android.view.View " + rootViewName + ";\n");
+        generator.append("this." + rootViewName + " = " + rootViewName + ";\n");
+
+        for (Element element : mElements) {
+            if (!element.used) {
+                continue;
+            }
+
+            // field
+            holderBuilder.append("public " + element.name + " " + element.fieldName + ";\n");
+
+            // findViewById in generator
+            generator.append("this." + element.fieldName + " = (" + element.name + ") "
+                    + rootViewName + ".findViewById(" + element.getFullID() + ");\n");
+        }
+        generator.append("}\n");
+
+        holderBuilder.append(generator.toString());
+
+        PsiClass viewHolder = mFactory.createClassFromText(holderBuilder.toString(), mClass);
+        viewHolder.setName(holderClassName);
+        mClass.add(viewHolder);
+        mClass.addBefore(mFactory.createKeyword("public", mClass), mClass.findInnerClassByName(holderClassName, true));
+        mClass.addBefore(mFactory.createKeyword("static", mClass), mClass.findInnerClassByName(holderClassName, true));
+    }
 
     /**
      * Create fields for injections inside main class
@@ -146,9 +119,7 @@ public class LayoutCreator extends WriteCommandAction.Simple {
                 StringBuilder method = new StringBuilder();
                 method.append("@Override protected void onCreate(android.os.Bundle savedInstanceState) {\n");
                 method.append("super.onCreate(savedInstanceState);\n");
-                method.append("\t// TODO: add setContentView(...) invocation\n");
-//                method.append(butterKnife.getCanonicalBindStatement());
-                method.append("(this);\n");
+                method.append("\t// TODO: add setContentView(...) and run LayoutCreator again\n");
                 method.append("}");
 
                 mClass.add(mFactory.createMethodFromText(method.toString(), mClass));
@@ -169,14 +140,12 @@ public class LayoutCreator extends WriteCommandAction.Simple {
                             initView.append("private void initView() {\n");
 
                             boolean hasClickable = false;
-                            boolean hasCheckable = false;
                             for (Element element : mElements) {
                                 if (!element.used) {
                                     continue;
                                 }
 
-                                initView.append(element.fieldName + " = " +
-                                        "(" + element.name + ") findViewById(" + element.getFullID() + ");\n");
+                                initView.append(element.fieldName + " = (" + element.name + ") findViewById(" + element.getFullID() + ");\n");
 
                                 // set flag
                                 if (!hasClickable) {
@@ -198,7 +167,7 @@ public class LayoutCreator extends WriteCommandAction.Simple {
                                     // add implement if not exist
                                     if(!hasImpl) {
                                         PsiJavaCodeReferenceElement pjcre = mFactory.createReferenceElementByFQClassName(
-                                                "OnClickListener", mClass.getResolveScope());
+                                                "android.view.View.OnClickListener", mClass.getResolveScope());
                                         implementsList.add(pjcre);
                                     }
                                 }
@@ -264,8 +233,7 @@ public class LayoutCreator extends WriteCommandAction.Simple {
                         } else {
                             StringBuilder findViewById = new StringBuilder();
                             for (Element element : mElements) {
-                                findViewById.append(element.fieldName + " = " +
-                                        "(" + element.name + ") findViewById(" + element.getFullID() + ");\n");
+                                findViewById.append(element.fieldName + " = (" + element.name + ") findViewById(" + element.getFullID() + ");\n");
                             }
                             onCreateView.getBody().addAfter(mFactory.createStatementFromText(findViewById.toString(), mClass), statement);
                             break;

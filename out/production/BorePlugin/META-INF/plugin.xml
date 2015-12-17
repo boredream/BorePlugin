@@ -32,6 +32,7 @@
         <action id="BorePlugin.LayoutCreator" class="action.LayoutCreatorAction" text="LayoutCreator"
                 description="auto create layout code for Activity">
             <add-to-group group-id="CodeMenu" anchor="last"/>
+            <add-to-group group-id="GenerateGroup" anchor="last"/>
         </action>
     </actions>
 

@@ -2,16 +2,14 @@
     <id>com.your.company.unique.plugin.id</id>
     <name>LayoutCreator</name>
     <version>1.0</version>
-    <vendor email="support@yourcompany.com" url="http://www.yourcompany.com">YourCompany</vendor>
+    <vendor email="loveghs@163.com" url="https://github.com/boredream/BorePlugin">Github</vendor>
 
     <description><![CDATA[
-      auto generator findViewById code in Activity or Adapter(ViewHolder).<br>
-      <em>most HTML tags may be used</em>
+      auto generator findViewById code in Activity or Adapter(ViewHolder)
     ]]></description>
 
     <change-notes><![CDATA[
       first version<br>
-      <em>most HTML tags may be used</em>
     ]]>
     </change-notes>
 

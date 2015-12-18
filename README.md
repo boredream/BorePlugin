@@ -1,7 +1,11 @@
 # 功能
-
 可以让你在Activity中自动生成findViewById等代码
 或者在Adapter中自动生成ViewHolder代码
+
+
+# 安装
+方式一. 下载项目中的jar包,通过本地disk方式导入
+方式二. 在Android Studio的插件中心搜索LayoutCreator下载安装
 
 
 # 用法

@@ -1,8 +1,8 @@
 <idea-plugin version="2">
-    <id>com.your.company.unique.plugin.id</id>
+    <id>com.boredream.plugin.layoutcreator</id>
     <name>LayoutCreator</name>
     <version>1.0</version>
-    <vendor email="loveghs@163.com" url="https://github.com/boredream/BorePlugin">Github</vendor>
+    <vendor email="boredream@163.com" url="https://github.com/boredream/BorePlugin">Github</vendor>
 
     <description><![CDATA[
       auto generator findViewById code in Activity or Adapter(ViewHolder)

@@ -7,8 +7,10 @@ import com.intellij.psi.*;
 import com.intellij.psi.codeStyle.JavaCodeStyleManager;
 import com.intellij.psi.search.EverythingGlobalScope;
 import entity.Element;
+import org.apache.http.util.TextUtils;
 
 import java.util.ArrayList;
+import java.util.List;
 
 
 public class LayoutCreator extends WriteCommandAction.Simple {
@@ -128,9 +130,9 @@ public class LayoutCreator extends WriteCommandAction.Simple {
                 for (PsiStatement statement : onCreate.getBody().getStatements()) {
                     // Search for setContentView()
                     if (statement.getFirstChild() instanceof PsiMethodCallExpression) {
-                        PsiReferenceExpression methodExpression
-                                = ((PsiMethodCallExpression) statement.getFirstChild())
-                                .getMethodExpression();
+                        PsiReferenceExpression methodExpression = ((PsiMethodCallExpression) statement.getFirstChild()).getMethodExpression();
+                        List<Element> editTextElements = new ArrayList<>();
+                        List<Element> clickableElements = new ArrayList<>();
                         if (methodExpression.getText().equals("setContentView")) {
                             // Insert initView() after setContentView()
                             onCreate.getBody().addAfter(mFactory.createStatementFromText("initView();", mClass), statement);
@@ -139,7 +141,6 @@ public class LayoutCreator extends WriteCommandAction.Simple {
                             StringBuilder initView = new StringBuilder();
                             initView.append("private void initView() {\n");
 
-                            boolean hasClickable = false;
                             for (Element element : mElements) {
                                 if (!element.used) {
                                     continue;
@@ -148,14 +149,61 @@ public class LayoutCreator extends WriteCommandAction.Simple {
                                 initView.append(element.fieldName + " = (" + element.name + ") findViewById(" + element.getFullID() + ");\n");
 
                                 // set flag
-                                if (!hasClickable) {
-                                    hasClickable = element.isClickable();
+                                if(element.isEditText) {
+                                    editTextElements.add(element);
+                                }
+                                if (element.isClickable) {
+                                    clickableElements.add(element);
                                 }
                             }
 
+                            // generator EditText validate code if need
+                            StringBuilder sbEditText = new StringBuilder();
+                            if(editTextElements.size() > 0) {
+
+                                // private void submit() {
+                                //	// validate
+                                //	String content = et_content.getText().toString().trim();
+                                //	if(!TextUtils.isEmpty(content)) {
+                                //		Toast.makeText(this, "content不能为空", Toast.LENGTH_SHORT).show();
+                                //		return;
+                                //	}
+                                //	// TODO validate success, do something
+                                //
+                                //}
+                                sbEditText.append("\n");
+                                sbEditText.append("private void submit() {\n");
+                                sbEditText.append("// validate\n");
+
+                                for(Element element : editTextElements) {
+                                    // generator EditText string name
+                                    String idName = element.id;
+                                    int index = idName.lastIndexOf("_");
+                                    String name = index == -1 ? idName : idName.substring(index + 1);
+
+                                    sbEditText.append("String " + name + " = " + idName + ".getText().toString().trim();\n");
+                                    sbEditText.append("if(TextUtils.isEmpty(" + name + ")) {\n");
+                                    // 提示的toast为EditText的hint文字,无hint时格式为"name不能为空"
+                                    String emptyTint = name + "不能为空";
+                                    String hint = element.xml.getAttributeValue("android:hint");
+                                    if(!TextUtils.isEmpty(hint)) {
+                                        emptyTint = hint;
+                                    }
+                                    sbEditText.append("Toast.makeText(this, \"" + emptyTint + ", Toast.LENGTH_SHORT).show();");
+                                    sbEditText.append("return;");
+                                    sbEditText.append("}");
+                                    sbEditText.append("");
+                                }
+
+                                sbEditText.append("// TODO validate success, do something");
+                                sbEditText.append("");
+                                sbEditText.append("");
+                                sbEditText.append("}");
+                            }
+
                             // generator clickable code if need
-                            StringBuilder clickable = new StringBuilder();
-                            if(hasClickable) {
+                            StringBuilder sbClickable = new StringBuilder();
+                            if(clickableElements.size() > 0) {
                                 // let class implement OnClickListener
                                 PsiReferenceList implementsList = mClass.getImplementsList();
                                 if(implementsList != null) {
@@ -172,35 +220,30 @@ public class LayoutCreator extends WriteCommandAction.Simple {
                                     }
                                 }
 
-                                if(implementsList != null &&
-                                        (implementsList.getText() != null && implementsList.getText().contains("OnClickListener"))) {
-                                }
-
                                 initView.append("\n");
 
-                                clickable.append("@Override public void onClick(View v) {\n")
+                                sbClickable.append("@Override public void onClick(View v) {\n")
                                         .append("switch (v.getId()) {\n");
 
-                                for (Element element : mElements) {
-                                    if (!element.used || !element.isClickable()) {
-                                        continue;
-                                    }
-
+                                for (Element element : clickableElements) {
                                     // generator setOnClickListener code in initView()
                                     initView.append(element.fieldName + ".setOnClickListener(this);\n");
 
                                     // generator override public void onClick(View v) method
-                                    clickable.append("case " + element.getFullID() + " :\n\nbreak;\n");
+                                    sbClickable.append("case " + element.getFullID() + " :\n\nbreak;\n");
                                 }
 
-                                clickable.append("}\n}");
+                                sbClickable.append("}\n}");
                             }
 
                             initView.append("}");
                             mClass.add(mFactory.createMethodFromText(initView.toString(), mClass));
 
-                            if(hasClickable) {
-                                mClass.add(mFactory.createMethodFromText(clickable.toString(), mClass));
+                            if(editTextElements.size() > 0) {
+                                mClass.add(mFactory.createMethodFromText(sbEditText.toString(), mClass));
+                            }
+                            if(clickableElements.size() > 0) {
+                                mClass.add(mFactory.createMethodFromText(sbClickable.toString(), mClass));
                             }
                             break;
                         }

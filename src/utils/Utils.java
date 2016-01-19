@@ -180,6 +180,16 @@ public class Utils {
                         return; // empty value
                     }
 
+                    // clickable
+                    boolean isClickable = false;
+                    XmlAttribute clickable = tag.getAttribute("android:clickable", null);
+                    if(tag.getName().contains("RadioButton")) {
+                        // TODO
+                    } else if (tag.getName().contains("Button")
+                            || (clickable != null && clickable.getValue() != null && clickable.getValue().equals("true"))) {
+                        isClickable = true;
+                    }
+
                     // check if there is defined custom class
                     String name = tag.getName();
                     XmlAttribute clazz = tag.getAttribute("class", null);
@@ -189,7 +199,7 @@ public class Utils {
 
                     try {
                         Element e = new Element(name, value);
-                        e.xml = tag;
+                        e.setClickable(isClickable);
                         elements.add(e);
                     } catch (IllegalArgumentException e) {
                         // TODO log

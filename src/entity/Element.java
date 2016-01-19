@@ -1,7 +1,6 @@
 package entity;
 
-import com.intellij.psi.xml.XmlAttribute;
-import com.intellij.psi.xml.XmlTag;
+import utils.Utils;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -19,8 +18,6 @@ public class Element {
     public boolean isValid = false;
     public boolean used = true;
     public boolean isClickable = false; // Button, view_having_clickable_attr etc.
-    public boolean isEditText = false; // EditText
-    public XmlTag xml;
 
     /**
      * Constructs new element
@@ -54,18 +51,6 @@ public class Element {
         }
 
         this.fieldName = getFieldName();
-
-        // clickable
-        XmlAttribute clickable = xml.getAttribute("android:clickable", null);
-        if(xml.getName().contains("RadioButton")) {
-            // check
-        } else if (xml.getName().contains("Button")
-                || (clickable != null && clickable.getValue() != null && clickable.getValue().equals("true"))) {
-            isClickable = true;
-        }
-
-        // isEditText
-        isEditText = xml.getName().contains("EditText");
     }
 
     /**
@@ -129,5 +114,13 @@ public class Element {
         isValid = matcher.find();
 
         return isValid;
+    }
+
+    public boolean isClickable() {
+        return isClickable;
+    }
+
+    public void setClickable(boolean clickable) {
+        isClickable = clickable;
     }
 }

@@ -131,117 +131,10 @@ public class LayoutCreator extends WriteCommandAction.Simple {
                     // Search for setContentView()
                     if (statement.getFirstChild() instanceof PsiMethodCallExpression) {
                         PsiReferenceExpression methodExpression = ((PsiMethodCallExpression) statement.getFirstChild()).getMethodExpression();
-                        List<Element> editTextElements = new ArrayList<>();
-                        List<Element> clickableElements = new ArrayList<>();
                         if (methodExpression.getText().equals("setContentView")) {
                             // Insert initView() after setContentView()
                             onCreate.getBody().addAfter(mFactory.createStatementFromText("initView();", mClass), statement);
-
-                            // generator findViewById code in initView() method
-                            StringBuilder initView = new StringBuilder();
-                            initView.append("private void initView() {\n");
-
-                            for (Element element : mElements) {
-                                if (!element.used) {
-                                    continue;
-                                }
-
-                                initView.append(element.fieldName + " = (" + element.name + ") findViewById(" + element.getFullID() + ");\n");
-
-                                // set flag
-                                if(element.isEditText) {
-                                    editTextElements.add(element);
-                                }
-                                if (element.isClickable) {
-                                    clickableElements.add(element);
-                                }
-                            }
-
-                            // generator EditText validate code if need
-                            StringBuilder sbEditText = new StringBuilder();
-                            if(editTextElements.size() > 0) {
-
-                                // private void submit() {
-                                //	// validate
-                                //	String content = et_content.getText().toString().trim();
-                                //	if(!TextUtils.isEmpty(content)) {
-                                //		Toast.makeText(this, "content不能为空", Toast.LENGTH_SHORT).show();
-                                //		return;
-                                //	}
-                                //	// TODO validate success, do something
-                                //
-                                //}
-                                sbEditText.append("private void submit() {\n");
-                                sbEditText.append("\t\t// validate\n");
-
-                                for(Element element : editTextElements) {
-                                    // generator EditText string name
-                                    String idName = element.id;
-                                    int index = idName.lastIndexOf("_");
-                                    String name = index == -1 ? idName : idName.substring(index + 1);
-
-                                    sbEditText.append("String " + name + " = " + idName + ".getText().toString().trim();\n");
-                                    sbEditText.append("if(TextUtils.isEmpty(" + name + ")) {\n");
-                                    // 提示的toast为EditText的hint文字,无hint时格式为"name不能为空"
-                                    String emptyTint = name + "不能为空";
-                                    String hint = element.xml.getAttributeValue("android:hint");
-                                    if(!TextUtils.isEmpty(hint)) {
-                                        emptyTint = hint;
-                                    }
-                                    sbEditText.append("Toast.makeText(this, \"" + emptyTint + "\", Toast.LENGTH_SHORT).show();\n");
-                                    sbEditText.append("return;\n");
-                                    sbEditText.append("}\n");
-                                    sbEditText.append("\n");
-                                }
-
-                                sbEditText.append("\t\t// TODO validate success, do something\n");
-                                sbEditText.append("\n\n}\n");
-                            }
-
-                            // generator clickable code if need
-                            StringBuilder sbClickable = new StringBuilder();
-                            if(clickableElements.size() > 0) {
-                                // let class implement OnClickListener
-                                PsiReferenceList implementsList = mClass.getImplementsList();
-                                if(implementsList != null) {
-                                    PsiJavaCodeReferenceElement[] referenceElements = implementsList.getReferenceElements();
-                                    boolean hasImpl = false;
-                                    for(PsiJavaCodeReferenceElement re : referenceElements) {
-                                        hasImpl = re.getText().contains("OnClickListener");
-                                    }
-                                    // add implement if not exist
-                                    if(!hasImpl) {
-                                        PsiJavaCodeReferenceElement pjcre = mFactory.createReferenceElementByFQClassName(
-                                                "android.view.View.OnClickListener", mClass.getResolveScope());
-                                        implementsList.add(pjcre);
-                                    }
-                                }
-
-                                initView.append("\n");
-
-                                sbClickable.append("@Override public void onClick(View v) {\n")
-                                        .append("switch (v.getId()) {\n");
-
-                                for (Element element : clickableElements) {
-                                    // generator setOnClickListener code in initView()
-                                    initView.append(element.fieldName + ".setOnClickListener(this);\n");
-
-                                    // generator override public void onClick(View v) method
-                                    sbClickable.append("case " + element.getFullID() + " :\n\nbreak;\n");
-                                }
-
-                                sbClickable.append("}\n}");
-                            }
-
-                            initView.append("}");
-                            mClass.add(mFactory.createMethodFromText(initView.toString(), mClass));
-
-                            if(editTextElements.size() > 0) {
-                                mClass.add(mFactory.createMethodFromText(sbEditText.toString(), mClass));
-                            }
-                            if(clickableElements.size() > 0) {
-                                mClass.add(mFactory.createMethodFromText(sbClickable.toString(), mClass));
-                            }
+                            generatorLayoutCode("this", null);
                             break;
                         }
                     }
@@ -250,38 +143,158 @@ public class LayoutCreator extends WriteCommandAction.Simple {
             // Check for Fragment class
         } else if ((fragmentClass != null && mClass.isInheritor(fragmentClass, true)) || (supportFragmentClass != null && mClass.isInheritor(supportFragmentClass, true))) {
             if (mClass.findMethodsByName("onCreateView", false).length == 0) {
-                // Add an empty stub of onCreateView()
-                StringBuilder method = new StringBuilder();
-                method.append("@Override public View onCreateView(android.view.LayoutInflater inflater, android.view.ViewGroup container, android.os.Bundle savedInstanceState) {\n");
-                method.append("\t// TODO: inflate a fragment view\n");
-                method.append("android.view.View rootView = super.onCreateView(inflater, container, savedInstanceState);\n");
-//                method.append(butterKnife.getCanonicalBindStatement());
-                method.append("(this, rootView);\n");
-                method.append("return rootView;\n");
-                method.append("}");
-
-                mClass.add(mFactory.createMethodFromText(method.toString(), mClass));
+//                // Add an empty stub of onCreateView()
+//                StringBuilder method = new StringBuilder();
+//                method.append("@Override public View onCreateView(android.view.LayoutInflater inflater, android.view.ViewGroup container, android.os.Bundle savedInstanceState) {\n");
+//                method.append("\t// TODO: inflate a fragment view\n");
+//                method.append("android.view.View rootView = super.onCreateView(inflater, container, savedInstanceState);\n");
+////                method.append(butterKnife.getCanonicalBindStatement());
+//                method.append("(this, rootView);\n");
+//                method.append("return rootView;\n");
+//                method.append("}");
+//
+//                mClass.add(mFactory.createMethodFromText(method.toString(), mClass));
             } else {
                 PsiMethod onCreateView = mClass.findMethodsByName("onCreateView", false)[0];
                 for (PsiStatement statement : onCreateView.getBody().getStatements()) {
                     if (statement instanceof PsiReturnStatement) {
                         String returnValue = ((PsiReturnStatement) statement).getReturnValue().getText();
-                        if (returnValue.contains("R.layout")) {
-                            onCreateView.getBody().addBefore(mFactory.createStatementFromText("android.view.View view = " + returnValue + ";", mClass), statement);
+//                        if (returnValue.contains("R.layout")) {
+//                            onCreateView.getBody().addBefore(mFactory.createStatementFromText("android.view.View view = " + returnValue + ";", mClass), statement);
 //                                onCreateView.getBody().addBefore(mFactory.createStatementFromText(butterKnife.getCanonicalBindStatement() + "(this, view);", mClass), statement);
-                            statement.replace(mFactory.createStatementFromText("return view;", mClass));
-                        } else {
-                            StringBuilder findViewById = new StringBuilder();
-                            for (Element element : mElements) {
-                                findViewById.append(element.fieldName + " = (" + element.name + ") findViewById(" + element.getFullID() + ");\n");
-                            }
-                            onCreateView.getBody().addAfter(mFactory.createStatementFromText(findViewById.toString(), mClass), statement);
-                            break;
-                        }
+//                            statement.replace(mFactory.createStatementFromText("return view;", mClass));
+//                        } else {
+//                            StringBuilder findViewById = new StringBuilder();
+//                            for (Element element : mElements) {
+//                                findViewById.append(element.fieldName + " = (" + element.name + ") findViewById(" + element.getFullID() + ");\n");
+//                            }
+//                            onCreateView.getBody().addAfter(mFactory.createStatementFromText(findViewById.toString(), mClass), statement);
+//                            break;
+//                        }
+
+                        // Insert initView() after setContentView()
+                        onCreateView.getBody().addBefore(mFactory.createStatementFromText("initView(" + returnValue + ");", mClass), statement);
+                        generatorLayoutCode("getContext()", returnValue);
                         break;
                     }
                 }
             }
+        }
+    }
+
+    private void generatorLayoutCode(String contextName, String findPre) {
+        List<Element> editTextElements = new ArrayList<>();
+        List<Element> clickableElements = new ArrayList<>();
+
+        // generator findViewById code in initView() method
+        StringBuilder initView = new StringBuilder();
+        if (TextUtils.isEmpty(findPre)) {
+            initView.append("private void initView() {\n");
+        } else {
+            initView.append("private void initView(View " + findPre + ") {\n");
+        }
+
+        for (Element element : mElements) {
+            if (!element.used) {
+                continue;
+            }
+
+            String pre = TextUtils.isEmpty(findPre) ? "" : findPre + ".";
+            initView.append(element.fieldName + " = (" + element.name + ") " + pre + "findViewById(" + element.getFullID() + ");\n");
+
+            // set flag
+            if (element.isEditText) {
+                editTextElements.add(element);
+            }
+            if (element.isClickable) {
+                clickableElements.add(element);
+            }
+        }
+
+        // generator EditText validate code if need
+        StringBuilder sbEditText = new StringBuilder();
+        if (editTextElements.size() > 0) {
+
+            // private void submit() {
+            //	// validate
+            //	String content = et_content.getText().toString().trim();
+            //	if(!TextUtils.isEmpty(content)) {
+            //		Toast.makeText(this, "content不能为空", Toast.LENGTH_SHORT).show();
+            //		return;
+            //	}
+            //	// TODO validate success, do something
+            //
+            //}
+            sbEditText.append("private void submit() {\n");
+            sbEditText.append("\t\t// validate\n");
+
+            for (Element element : editTextElements) {
+                // generator EditText string name
+                String idName = element.id;
+                int index = idName.lastIndexOf("_");
+                String name = index == -1 ? idName : idName.substring(index + 1);
+
+                sbEditText.append("String " + name + " = " + idName + ".getText().toString().trim();\n");
+                sbEditText.append("if(TextUtils.isEmpty(" + name + ")) {\n");
+                // 提示的toast为EditText的hint文字,无hint时格式为"name不能为空"
+                String emptyTint = name + "不能为空";
+                String hint = element.xml.getAttributeValue("android:hint");
+                if (!TextUtils.isEmpty(hint)) {
+                    emptyTint = hint;
+                }
+                sbEditText.append("Toast.makeText(" + contextName + ", \"" + emptyTint + "\", Toast.LENGTH_SHORT).show();\n");
+                sbEditText.append("return;\n");
+                sbEditText.append("}\n");
+                sbEditText.append("\n");
+            }
+
+            sbEditText.append("\t\t// TODO validate success, do something\n");
+            sbEditText.append("\n\n}\n");
+        }
+
+        // generator clickable code if need
+        StringBuilder sbClickable = new StringBuilder();
+        if (clickableElements.size() > 0) {
+            // let class implement OnClickListener
+            PsiReferenceList implementsList = mClass.getImplementsList();
+            if (implementsList != null) {
+                PsiJavaCodeReferenceElement[] referenceElements = implementsList.getReferenceElements();
+                boolean hasImpl = false;
+                for (PsiJavaCodeReferenceElement re : referenceElements) {
+                    hasImpl = re.getText().contains("OnClickListener");
+                }
+                // add implement if not exist
+                if (!hasImpl) {
+                    PsiJavaCodeReferenceElement pjcre = mFactory.createReferenceElementByFQClassName(
+                            "android.view.View.OnClickListener", mClass.getResolveScope());
+                    implementsList.add(pjcre);
+                }
+            }
+
+            initView.append("\n");
+
+            sbClickable.append("@Override public void onClick(View v) {\n")
+                    .append("switch (v.getId()) {\n");
+
+            for (Element element : clickableElements) {
+                // generator setOnClickListener code in initView()
+                initView.append(element.fieldName + ".setOnClickListener(this);\n");
+
+                // generator override public void onClick(View v) method
+                sbClickable.append("case " + element.getFullID() + " :\n\nbreak;\n");
+            }
+
+            sbClickable.append("}\n}");
+        }
+
+        initView.append("}");
+        mClass.add(mFactory.createMethodFromText(initView.toString(), mClass));
+
+        if (editTextElements.size() > 0) {
+            mClass.add(mFactory.createMethodFromText(sbEditText.toString(), mClass));
+        }
+        if (clickableElements.size() > 0) {
+            mClass.add(mFactory.createMethodFromText(sbClickable.toString(), mClass));
         }
     }
 }

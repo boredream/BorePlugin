@@ -171,9 +171,8 @@ public class LayoutCreator extends WriteCommandAction.Simple {
                                 //	// TODO validate success, do something
                                 //
                                 //}
-                                sbEditText.append("\n");
                                 sbEditText.append("private void submit() {\n");
-                                sbEditText.append("// validate\n");
+                                sbEditText.append("\t\t// validate\n");
 
                                 for(Element element : editTextElements) {
                                     // generator EditText string name
@@ -189,16 +188,14 @@ public class LayoutCreator extends WriteCommandAction.Simple {
                                     if(!TextUtils.isEmpty(hint)) {
                                         emptyTint = hint;
                                     }
-                                    sbEditText.append("Toast.makeText(this, \"" + emptyTint + ", Toast.LENGTH_SHORT).show();");
-                                    sbEditText.append("return;");
-                                    sbEditText.append("}");
-                                    sbEditText.append("");
+                                    sbEditText.append("Toast.makeText(this, \"" + emptyTint + "\", Toast.LENGTH_SHORT).show();\n");
+                                    sbEditText.append("return;\n");
+                                    sbEditText.append("}\n");
+                                    sbEditText.append("\n");
                                 }
 
-                                sbEditText.append("// TODO validate success, do something");
-                                sbEditText.append("");
-                                sbEditText.append("");
-                                sbEditText.append("}");
+                                sbEditText.append("\t\t// TODO validate success, do something\n");
+                                sbEditText.append("\n\n}\n");
                             }
 
                             // generator clickable code if need

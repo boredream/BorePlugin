@@ -1,7 +1,7 @@
-<idea-plugin version="3">
+<idea-plugin version="12">
     <id>com.boredream.plugin.layoutcreator</id>
     <name>LayoutCreator</name>
-    <version>1.1</version>
+    <version>1.2</version>
     <vendor email="boredream@163.com" url="https://github.com/boredream/BorePlugin">Github</vendor>
 
     <description><![CDATA[

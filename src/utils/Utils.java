@@ -188,8 +188,7 @@ public class Utils {
                     }
 
                     try {
-                        Element e = new Element(name, value);
-                        e.xml = tag;
+                        Element e = new Element(name, value, tag);
                         elements.add(e);
                     } catch (IllegalArgumentException e) {
                         // TODO log

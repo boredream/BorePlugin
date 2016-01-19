@@ -29,7 +29,7 @@ public class Element {
      * @param id Value in android:id attribute
      * @throws IllegalArgumentException When the arguments are invalid
      */
-    public Element(String name, String id) {
+    public Element(String name, String id, XmlTag xml) {
         // id
         final Matcher matcher = sIdPattern.matcher(id);
         if (matcher.find() && matcher.groupCount() > 1) {
@@ -53,6 +53,7 @@ public class Element {
             this.name = name;
         }
 
+        this.xml = xml;
         this.fieldName = getFieldName();
 
         // clickable

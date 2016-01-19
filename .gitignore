@@ -6,6 +6,7 @@
 .project
 .metadata
 bin/
+out/
 tmp/
 *.tmp
 *.bak
@@ -217,3 +218,5 @@ pip-log.txt
 
 
 *.class
+
+.idea/

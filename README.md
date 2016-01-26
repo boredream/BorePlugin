@@ -1,5 +1,5 @@
 # 功能
-可以让你在Activity中自动生成findViewById等代码<br/>
+可以让你在Activity/Fragment中自动生成findViewById等布局相关初始化代码<br/>
 或者在Adapter中自动生成ViewHolder代码
 
 

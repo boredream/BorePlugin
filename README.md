@@ -15,3 +15,6 @@
 4. 弹出的对话框中还可以勾选是否生成ViewHolder<br/>
 5. 选择好后Confirm确认即可
 
+
+# 用法截图
+![image](https://github.com/boredream/BorePlugin/blob/master/screenshot/LayoutCreator.gif)

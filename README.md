@@ -18,3 +18,11 @@
 
 # 用法截图
 ![image](https://github.com/boredream/BorePlugin/blob/master/screenshot/LayoutCreator.gif)
+
+
+# 代码生成规则
+1. 自动遍历目标布局中所有带id的文件, 无id的不会识别处理
+2. 控件生成的变量名默认为id名称, 可以在弹出确认框右侧的名称输入栏中自行修改
+3. 所有的Button或者带clickable=true的控件, 都会自动在代码中生成setOnClickListener相关代码
+4. 所有EditText控件, 都会在代码中生成非空判断代码, 如果为空会提示EditText的hint内容, 如果hint为空则提示xxx字符串不能为空字样
+5. 会自动识别布局中的include标签, 并读取对应布局中的控件

@@ -26,3 +26,11 @@
 3. 所有的Button或者带clickable=true的控件, 都会自动在代码中生成setOnClickListener相关代码
 4. 所有EditText控件, 都会在代码中生成非空判断代码, 如果为空会提示EditText的hint内容, 如果hint为空则提示xxx字符串不能为空字样, 最后会把所有输入框的验证合并到一个submit方法中
 5. 会自动识别布局中的include标签, 并读取对应布局中的控件
+
+
+# 历史版本
+1.0 初始化版本
+1.1 添加了Fragment ViewHolder等支持
+1.2 添加了EditText的验证代码生成, 详细见 代码生成规则4
+1.3 优化了二次生成布局代码时重复问题
+  根据当前类中成员变量判断控件是否已经存在, 避免重复添加

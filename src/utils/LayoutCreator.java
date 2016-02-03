@@ -5,11 +5,13 @@ import com.intellij.openapi.command.WriteCommandAction;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.*;
 import com.intellij.psi.codeStyle.JavaCodeStyleManager;
+import com.intellij.psi.impl.source.tree.PsiWhiteSpaceImpl;
 import com.intellij.psi.search.EverythingGlobalScope;
 import entity.Element;
 import org.apache.http.util.TextUtils;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 
@@ -97,8 +99,27 @@ public class LayoutCreator extends WriteCommandAction.Simple {
      * Create fields for injections inside main class
      */
     protected void generateFields() {
-        for (Element element : mElements) {
+        for (Iterator<Element> iterator = mElements.iterator(); iterator.hasNext(); ) {
+            Element element = iterator.next();
+
             if (!element.used) {
+                iterator.remove();
+                continue;
+            }
+
+            // remove duplicate field
+            PsiField[] fields = mClass.getFields();
+            boolean duplicateField = false;
+            for (PsiField field : fields) {
+                String name = field.getName();
+                if (name != null && name.equals(element.fieldName)) {
+                    duplicateField = true;
+                    break;
+                }
+            }
+
+            if (duplicateField) {
+                iterator.remove();
                 continue;
             }
 
@@ -109,13 +130,16 @@ public class LayoutCreator extends WriteCommandAction.Simple {
     protected void generateFindViewById() {
         PsiClass activityClass = JavaPsiFacade.getInstance(mProject).findClass(
                 "android.app.Activity", new EverythingGlobalScope(mProject));
+        PsiClass compatActivityClass = JavaPsiFacade.getInstance(mProject).findClass(
+                "android.support.v7.app.AppCompatActivity", new EverythingGlobalScope(mProject));
         PsiClass fragmentClass = JavaPsiFacade.getInstance(mProject).findClass(
                 "android.app.Fragment", new EverythingGlobalScope(mProject));
         PsiClass supportFragmentClass = JavaPsiFacade.getInstance(mProject).findClass(
                 "android.support.v4.app.Fragment", new EverythingGlobalScope(mProject));
 
         // Check for Activity class
-        if (activityClass != null && mClass.isInheritor(activityClass, true)) {
+        if ((activityClass != null && mClass.isInheritor(activityClass, true))
+                || (compatActivityClass != null && mClass.isInheritor(compatActivityClass, true))) {
             if (mClass.findMethodsByName("onCreate", false).length == 0) {
                 // Add an empty stub of onCreate()
                 StringBuilder method = new StringBuilder();
@@ -126,58 +150,61 @@ public class LayoutCreator extends WriteCommandAction.Simple {
 
                 mClass.add(mFactory.createMethodFromText(method.toString(), mClass));
             } else {
+                PsiStatement setContentViewStatement = null;
+                boolean hasInitViewStatement = false;
+
                 PsiMethod onCreate = mClass.findMethodsByName("onCreate", false)[0];
                 for (PsiStatement statement : onCreate.getBody().getStatements()) {
                     // Search for setContentView()
                     if (statement.getFirstChild() instanceof PsiMethodCallExpression) {
                         PsiReferenceExpression methodExpression = ((PsiMethodCallExpression) statement.getFirstChild()).getMethodExpression();
                         if (methodExpression.getText().equals("setContentView")) {
-                            // Insert initView() after setContentView()
-                            onCreate.getBody().addAfter(mFactory.createStatementFromText("initView();", mClass), statement);
-                            generatorLayoutCode("this", null);
-                            break;
+                            setContentViewStatement = statement;
+                        } else if (methodExpression.getText().equals("initView")) {
+                            hasInitViewStatement = true;
                         }
                     }
                 }
+
+                if(!hasInitViewStatement && setContentViewStatement != null) {
+                    // Insert initView() after setContentView()
+                    onCreate.getBody().addAfter(mFactory.createStatementFromText("initView();", mClass), setContentViewStatement);
+                }
+                generatorLayoutCode("this", null);
             }
             // Check for Fragment class
         } else if ((fragmentClass != null && mClass.isInheritor(fragmentClass, true)) || (supportFragmentClass != null && mClass.isInheritor(supportFragmentClass, true))) {
             if (mClass.findMethodsByName("onCreateView", false).length == 0) {
-//                // Add an empty stub of onCreateView()
-//                StringBuilder method = new StringBuilder();
-//                method.append("@Override public View onCreateView(android.view.LayoutInflater inflater, android.view.ViewGroup container, android.os.Bundle savedInstanceState) {\n");
-//                method.append("\t// TODO: inflate a fragment view\n");
-//                method.append("android.view.View rootView = super.onCreateView(inflater, container, savedInstanceState);\n");
-////                method.append(butterKnife.getCanonicalBindStatement());
-//                method.append("(this, rootView);\n");
-//                method.append("return rootView;\n");
-//                method.append("}");
-//
-//                mClass.add(mFactory.createMethodFromText(method.toString(), mClass));
+                // Add an empty stub of onCreateView()
+                StringBuilder method = new StringBuilder();
+                method.append("@Override public View onCreateView(android.view.LayoutInflater inflater, android.view.ViewGroup container, android.os.Bundle savedInstanceState) {\n");
+                method.append("\t// TODO: inflate a fragment like bottom ... and run LayoutCreator again\n");
+                method.append("View view = View.inflate(getActivity(), R.layout.frag_layout, null);");
+                method.append("return view;");
+                method.append("}");
+                mClass.add(mFactory.createMethodFromText(method.toString(), mClass));
             } else {
+                PsiReturnStatement returnStatement = null;
+                String returnValue = null;
+                boolean hasInitViewStatement = false;
                 PsiMethod onCreateView = mClass.findMethodsByName("onCreateView", false)[0];
                 for (PsiStatement statement : onCreateView.getBody().getStatements()) {
                     if (statement instanceof PsiReturnStatement) {
-                        String returnValue = ((PsiReturnStatement) statement).getReturnValue().getText();
-//                        if (returnValue.contains("R.layout")) {
-//                            onCreateView.getBody().addBefore(mFactory.createStatementFromText("android.view.View view = " + returnValue + ";", mClass), statement);
-//                                onCreateView.getBody().addBefore(mFactory.createStatementFromText(butterKnife.getCanonicalBindStatement() + "(this, view);", mClass), statement);
-//                            statement.replace(mFactory.createStatementFromText("return view;", mClass));
-//                        } else {
-//                            StringBuilder findViewById = new StringBuilder();
-//                            for (Element element : mElements) {
-//                                findViewById.append(element.fieldName + " = (" + element.name + ") findViewById(" + element.getFullID() + ");\n");
-//                            }
-//                            onCreateView.getBody().addAfter(mFactory.createStatementFromText(findViewById.toString(), mClass), statement);
-//                            break;
-//                        }
-
-                        // Insert initView() after setContentView()
-                        onCreateView.getBody().addBefore(mFactory.createStatementFromText("initView(" + returnValue + ");", mClass), statement);
-                        generatorLayoutCode("getContext()", returnValue);
-                        break;
+                        returnStatement = (PsiReturnStatement) statement;
+                        returnValue = returnStatement.getReturnValue().getText();
+                    } else if(statement.getFirstChild() instanceof PsiMethodCallExpression) {
+                        PsiReferenceExpression methodExpression = ((PsiMethodCallExpression) statement.getFirstChild()).getMethodExpression();
+                        if (methodExpression.getText().equals("initView")) {
+                            hasInitViewStatement = true;
+                        }
                     }
                 }
+
+                if(!hasInitViewStatement && returnStatement != null && returnValue != null) {
+                    // Insert initView() before return statement
+                    onCreateView.getBody().addBefore(mFactory.createStatementFromText("initView(" + returnValue + ");", mClass), returnStatement);
+                }
+                generatorLayoutCode("getContext()", returnValue);
             }
         }
     }
@@ -195,10 +222,6 @@ public class LayoutCreator extends WriteCommandAction.Simple {
         }
 
         for (Element element : mElements) {
-            if (!element.used) {
-                continue;
-            }
-
             String pre = TextUtils.isEmpty(findPre) ? "" : findPre + ".";
             initView.append(element.fieldName + " = (" + element.name + ") " + pre + "findViewById(" + element.getFullID() + ");\n");
 
@@ -215,16 +238,6 @@ public class LayoutCreator extends WriteCommandAction.Simple {
         StringBuilder sbEditText = new StringBuilder();
         if (editTextElements.size() > 0) {
 
-            // private void submit() {
-            //	// validate
-            //	String content = et_content.getText().toString().trim();
-            //	if(!TextUtils.isEmpty(content)) {
-            //		Toast.makeText(this, "content不能为空", Toast.LENGTH_SHORT).show();
-            //		return;
-            //	}
-            //	// TODO validate success, do something
-            //
-            //}
             sbEditText.append("private void submit() {\n");
             sbEditText.append("\t\t// validate\n");
 
@@ -283,18 +296,61 @@ public class LayoutCreator extends WriteCommandAction.Simple {
                 // generator override public void onClick(View v) method
                 sbClickable.append("case " + element.getFullID() + " :\n\nbreak;\n");
             }
-
             sbClickable.append("}\n}");
         }
-
         initView.append("}");
-        mClass.add(mFactory.createMethodFromText(initView.toString(), mClass));
+
+        PsiMethod[] initViewMethods = mClass.findMethodsByName("initView", false);
+        if (initViewMethods.length > 0 && initViewMethods[0].getBody() != null) {
+            // already have method
+            // append non-repeated field
+            PsiCodeBlock initViewMethodBody = initViewMethods[0].getBody();
+
+            for (Element element : mElements) {
+
+                // append findViewById
+                String pre = TextUtils.isEmpty(findPre) ? "" : findPre + ".";
+                String s2 = element.fieldName + " = (" + element.name + ") " + pre + "findViewById(" + element.getFullID() + ");";
+                initViewMethodBody.add(mFactory.createStatementFromText(s2, initViewMethods[0]));
+
+                // append setOnClickListener
+                String s1 = element.fieldName + ".setOnClickListener(this);";
+                initViewMethodBody.add(mFactory.createStatementFromText(s1, initViewMethods[0]));
+            }
+        } else {
+            // new method
+            mClass.add(mFactory.createMethodFromText(initView.toString(), mClass));
+        }
+
+        if (clickableElements.size() > 0) {
+            PsiMethod[] onClickMethods = mClass.findMethodsByName("onClick", false);
+            if (onClickMethods.length > 0 && onClickMethods[0].getBody() != null) {
+                // already have method
+                // append non-repeated field
+                PsiCodeBlock onClickMethodBody = onClickMethods[0].getBody();
+
+                for(PsiElement element : onClickMethodBody.getChildren()) {
+                    if(element instanceof PsiSwitchStatement) {
+                        PsiSwitchStatement switchStatement = (PsiSwitchStatement) element;
+                        PsiCodeBlock body = switchStatement.getBody();
+                        if(body != null) {
+                            for (Element clickableElement : clickableElements) {
+                                String caseStr = "case " + clickableElement.getFullID() + " :";
+                                body.add(mFactory.createStatementFromText(caseStr, body));
+                                body.add(mFactory.createStatementFromText("break;", body));
+                            }
+                        }
+                        break;
+                    }
+                }
+            } else {
+                // new method
+                mClass.add(mFactory.createMethodFromText(sbClickable.toString(), mClass));
+            }
+        }
 
         if (editTextElements.size() > 0) {
             mClass.add(mFactory.createMethodFromText(sbEditText.toString(), mClass));
-        }
-        if (clickableElements.size() > 0) {
-            mClass.add(mFactory.createMethodFromText(sbClickable.toString(), mClass));
         }
     }
 }

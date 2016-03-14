@@ -1,7 +1,7 @@
 # 功能
 可以让你在Activity/Fragment中自动生成findViewById等布局相关初始化代码<br/>
 或者在Adapter中自动生成ViewHolder代码
-
+> 如果你有任何新的需求或者想法意见,也可以在issue中提出~
 
 # 安装
 方式一. 下载项目中的jar包,通过本地disk方式导入<br/>

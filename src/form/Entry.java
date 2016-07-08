@@ -16,7 +16,6 @@ public class Entry extends JPanel {
 
     protected EntryList mParent;
     protected Element mElement;
-    protected ArrayList<String> mGeneratedIDs;
     // ui
     protected JCheckBox mCheck;
     protected JLabel mType;
@@ -25,14 +24,13 @@ public class Entry extends JPanel {
     protected Color mNameDefaultColor;
     protected Color mNameErrorColor = new Color(0x880000);
 
-    public Entry(EntryList parent, Element element, ArrayList<String> ids) {
+    public Entry(EntryList parent, Element element) {
         mElement = element;
         mParent = parent;
-        mGeneratedIDs = ids;
 
         mCheck = new JCheckBox();
         mCheck.setPreferredSize(new Dimension(40, 26));
-        if (!mGeneratedIDs.contains(element.getFullID())) {
+        if (!element.id.contains(element.getFullID())) {
             mCheck.setSelected(mElement.used);
         } else {
             mCheck.setSelected(false);
@@ -45,9 +43,9 @@ public class Entry extends JPanel {
         mID = new JLabel(mElement.id);
         mID.setPreferredSize(new Dimension(160, 26));
 
-        mName = new JTextField(mElement.fieldName, 10);
+        mName = new JTextField(mElement.getFieldName(), 10);
         mNameDefaultColor = mName.getBackground();
-        mName.setPreferredSize(new Dimension(260, 26));
+        mName.setPreferredSize(new Dimension(360, 26));
         mName.addFocusListener(new FocusListener() {
             @Override
             public void focusGained(FocusEvent e) {
@@ -76,7 +74,6 @@ public class Entry extends JPanel {
 
     public Element syncElement() {
         mElement.used = mCheck.isSelected();
-        mElement.fieldName = mName.getText();
 
         if (mElement.checkValidity()) {
             mName.setBackground(mNameDefaultColor);

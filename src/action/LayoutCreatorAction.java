@@ -19,9 +19,6 @@ import utils.Utils;
 import javax.swing.*;
 import java.util.ArrayList;
 
-/**
- * Created by moyun on 2015/12/16.
- */
 public class LayoutCreatorAction extends BaseGenerateAction implements IConfirmListener, ICancelListener {
 
     protected JFrame mDialog;
@@ -121,25 +118,7 @@ public class LayoutCreatorAction extends BaseGenerateAction implements IConfirmL
             }
         }
 
-        // get already generated injections
-        ArrayList<String> ids = new ArrayList<String>();
-        PsiField[] fields = clazz.getAllFields();
-        String[] annotations;
-        String id;
-
-//        int i=0; // FIXME
-//        for (PsiField field : fields) {
-//            annotations = field.getFirstChild().getText().split(" ");
-//
-//            for (String annotation : annotations) {
-//                id = "id" + i ++; // FIXME
-//                if (!Utils.isEmptyString(id)) {
-//                    ids.add(id);
-//                }
-//            }
-//        }
-
-        EntryList panel = new EntryList(project, editor, elements, ids, createHolder, this, this);
+        EntryList panel = new EntryList(project, editor, elements, createHolder, this, this);
 
         mDialog = new JFrame();
         mDialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);

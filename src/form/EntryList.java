@@ -6,6 +6,7 @@ import com.intellij.ui.components.JBScrollPane;
 import entity.Element;
 import listener.ICancelListener;
 import listener.IConfirmListener;
+import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
@@ -16,23 +17,21 @@ import java.util.ArrayList;
 
 public class EntryList extends JPanel {
 
-    protected Project mProject;
-    protected Editor mEditor;
-    protected ArrayList<Element> mElements = new ArrayList<Element>();
-    protected ArrayList<String> mGeneratedIDs = new ArrayList<String>();
-    protected ArrayList<Entry> mEntries = new ArrayList<Entry>();
-    protected boolean mCreateHolder = false;
-    protected String mPrefix = null;
-    protected IConfirmListener mConfirmListener;
-    protected ICancelListener mCancelListener;
-    protected JCheckBox mPrefixCheck;
-    protected JTextField mPrefixValue;
-    protected JCheckBox mHolderCheck;
-    protected JLabel mHolderLabel;
-    protected JButton mConfirm;
-    protected JButton mCancel;
+    private Project mProject;
+    private Editor mEditor;
+    private ArrayList<Element> mElements = new ArrayList<Element>();
+    private ArrayList<Entry> mEntries = new ArrayList<Entry>();
+    private boolean mCreateHolder = false;
+    private String mPrefix = null;
+    private JScrollPane mScrollListPane;
+    private IConfirmListener mConfirmListener;
+    private ICancelListener mCancelListener;
+    private JCheckBox mHolderCheck;
+    private JLabel mHolderLabel;
+    private JButton mConfirm;
+    private JButton mCancel;
 
-    public EntryList(Project project, Editor editor, ArrayList<Element> elements, ArrayList<String> ids, boolean createHolder, IConfirmListener confirmListener, ICancelListener cancelListener) {
+    public EntryList(Project project, Editor editor, ArrayList<Element> elements, boolean createHolder, IConfirmListener confirmListener, ICancelListener cancelListener) {
         mProject = project;
         mEditor = editor;
         mCreateHolder = createHolder;
@@ -41,51 +40,63 @@ public class EntryList extends JPanel {
         if (elements != null) {
             mElements.addAll(elements);
         }
-        if (ids != null) {
-            mGeneratedIDs.addAll(ids);
-        }
 
-        setPreferredSize(new Dimension(640, 360));
+        setPreferredSize(new Dimension(740, 360));
         setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
 
         addInjections();
         addButtons();
     }
 
-    protected void addInjections() {
-        JPanel contentPanel = new JPanel();
+    private void addInjections() {
+        final JPanel contentPanel = new JPanel();
         contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.PAGE_AXIS));
         contentPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-        contentPanel.add(new EntryHeader());
+        contentPanel.add(new EntryHeader(new EntryHeader.OnTypeSelected() {
+            @Override
+            public void onTypeSelected(int type) {
+                for (Element element : mElements) {
+                    element.fieldNameType = type;
+                }
+
+                contentPanel.remove(mScrollListPane);
+                mScrollListPane = getScrollListPanel();
+                contentPanel.add(mScrollListPane);
+                refresh();
+            }
+        }));
         contentPanel.add(Box.createRigidArea(new Dimension(0, 5)));
 
-        JPanel injectionsPanel = new JPanel();
-        injectionsPanel.setLayout(new BoxLayout(injectionsPanel, BoxLayout.PAGE_AXIS));
-        injectionsPanel.add(Box.createRigidArea(new Dimension(0, 5)));
-
-        int cnt = 0;
-        for (Element element : mElements) {
-            Entry entry = new Entry(this, element, mGeneratedIDs);
-
-            if (cnt > 0) {
-                injectionsPanel.add(Box.createRigidArea(new Dimension(0, 5)));
-            }
-            injectionsPanel.add(entry);
-            cnt++;
-
-            mEntries.add(entry);
-        }
-        injectionsPanel.add(Box.createVerticalGlue());
-        injectionsPanel.add(Box.createRigidArea(new Dimension(0, 5)));
-
-        JBScrollPane scrollPane = new JBScrollPane(injectionsPanel);
-        contentPanel.add(scrollPane);
+        mScrollListPane = getScrollListPanel();
+        contentPanel.add(mScrollListPane);
 
         add(contentPanel, BorderLayout.CENTER);
         refresh();
     }
 
-    protected void addButtons() {
+    @NotNull
+    private JBScrollPane getScrollListPanel() {
+        JPanel injectionsPanel = new JPanel();
+        injectionsPanel.setLayout(new BoxLayout(injectionsPanel, BoxLayout.PAGE_AXIS));
+        injectionsPanel.add(Box.createRigidArea(new Dimension(0, 5)));
+
+        for (int i = 0; i < mElements.size(); i++) {
+            Element element = mElements.get(i);
+            Entry entry = new Entry(this, element);
+
+            if (i > 0) {
+                injectionsPanel.add(Box.createRigidArea(new Dimension(0, 5)));
+            }
+            injectionsPanel.add(entry);
+
+            mEntries.add(entry);
+        }
+        injectionsPanel.add(Box.createVerticalGlue());
+        injectionsPanel.add(Box.createRigidArea(new Dimension(0, 5)));
+        return new JBScrollPane(injectionsPanel);
+    }
+
+    private void addButtons() {
         mHolderCheck = new JCheckBox();
         mHolderCheck.setPreferredSize(new Dimension(32, 26));
         mHolderCheck.setSelected(mCreateHolder);
@@ -126,7 +137,7 @@ public class EntryList extends JPanel {
         refresh();
     }
 
-    protected void refresh() {
+    private void refresh() {
         revalidate();
 
         if (mConfirm != null) {
@@ -134,7 +145,7 @@ public class EntryList extends JPanel {
         }
     }
 
-    protected boolean checkValidity() {
+    private boolean checkValidity() {
         boolean valid = true;
 
         for (Element element : mElements) {
@@ -159,21 +170,7 @@ public class EntryList extends JPanel {
         }
     }
 
-    public class CheckPrefixListener implements ChangeListener {
-
-        @Override
-        public void stateChanged(ChangeEvent event) {
-            mPrefixValue.setEnabled(mPrefixCheck.isSelected());
-
-            if (mPrefixCheck.isSelected() && mPrefixValue.getText().length() > 0) {
-                mPrefix = mPrefixValue.getText();
-            } else {
-                mPrefix = null;
-            }
-        }
-    }
-
-    protected class ConfirmAction extends AbstractAction {
+    private class ConfirmAction extends AbstractAction {
 
         public void actionPerformed(ActionEvent event) {
             boolean valid = checkValidity();
@@ -190,7 +187,7 @@ public class EntryList extends JPanel {
         }
     }
 
-    protected class CancelAction extends AbstractAction {
+    private class CancelAction extends AbstractAction {
 
         public void actionPerformed(ActionEvent event) {
             if (mCancelListener != null) {

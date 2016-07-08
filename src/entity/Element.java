@@ -2,6 +2,7 @@ package entity;
 
 import com.intellij.psi.xml.XmlAttribute;
 import com.intellij.psi.xml.XmlTag;
+import utils.StringUtils;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -15,7 +16,7 @@ public class Element {
     public boolean isAndroidNS = false;
     public String nameFull; // element name with package
     public String name; // element name
-    public String fieldName; // name of variable
+    public int fieldNameType = 1; // 1 aa_bb_cc; 2 aaBbCc 3 mAaBbCc
     public boolean isValid = false;
     public boolean used = true;
     public boolean isClickable = false; // Button, view_having_clickable_attr etc.
@@ -26,7 +27,7 @@ public class Element {
      * Constructs new element
      *
      * @param name Class name of the view
-     * @param id Value in android:id attribute
+     * @param id   Value in android:id attribute
      * @throws IllegalArgumentException When the arguments are invalid
      */
     public Element(String name, String id, XmlTag xml) {
@@ -54,11 +55,10 @@ public class Element {
         }
 
         this.xml = xml;
-        this.fieldName = getFieldName();
 
         // clickable
         XmlAttribute clickable = xml.getAttribute("android:clickable", null);
-        if(xml.getName().contains("RadioButton")) {
+        if (xml.getName().contains("RadioButton")) {
             // check
         } else if (xml.getName().contains("Button")
                 || (clickable != null && clickable.getValue() != null && clickable.getValue().equals("true"))) {
@@ -95,29 +95,32 @@ public class Element {
      *
      * @return
      */
-    private String getFieldName() {
-//        String[] words = this.id.split("_");
-//        StringBuilder sb = new StringBuilder();
-//        sb.append(Utils.getPrefix());
-//
-//        for (int i = 0; i < words.length; i++) {
-//            if (words[i].isEmpty()) {
-//                // fixing issues with double underscores - see issue #40
-//                continue;
-//            }
-//            String[] idTokens = words[i].split("\\.");
-//            char[] chars = idTokens[idTokens.length - 1].toCharArray();
-//            if (i > 0 || !Utils.isEmptyString(Utils.getPrefix())) {
-//                chars[0] = Character.toUpperCase(chars[0]);
-//            }
-//
-//            sb.append(chars);
-//        }
-//
-//        return sb.toString();
-
-        // TODO
-        return id;
+    public String getFieldName() {
+        String fieldName = id;
+        String[] names = id.split("_");
+        if (fieldNameType == 2) {
+            // aaBbCc
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < names.length; i++) {
+                if (i == 0) {
+                    sb.append(names[i]);
+                } else {
+                    sb.append(StringUtils.firstToUpperCase(names[i]));
+                }
+            }
+            fieldName = sb.toString();
+        } else if (fieldNameType == 3) {
+            // mAaBbCc
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < names.length; i++) {
+                if (i == 0) {
+                    sb.append("m");
+                }
+                sb.append(StringUtils.firstToUpperCase(names[i]));
+            }
+            fieldName = sb.toString();
+        }
+        return fieldName;
     }
 
     /**
@@ -126,7 +129,7 @@ public class Element {
      * @return
      */
     public boolean checkValidity() {
-        Matcher matcher = sValidityPattern.matcher(fieldName);
+        Matcher matcher = sValidityPattern.matcher(getFieldName());
         isValid = matcher.find();
 
         return isValid;

@@ -78,10 +78,10 @@ public class LayoutCreator extends WriteCommandAction.Simple {
             }
 
             // field
-            holderBuilder.append("public " + element.name + " " + element.fieldName + ";\n");
+            holderBuilder.append("public " + element.name + " " + element.getFieldName() + ";\n");
 
             // findViewById in generator
-            generator.append("this." + element.fieldName + " = (" + element.name + ") "
+            generator.append("this." + element.getFieldName() + " = (" + element.name + ") "
                     + rootViewName + ".findViewById(" + element.getFullID() + ");\n");
         }
         generator.append("}\n");
@@ -112,7 +112,7 @@ public class LayoutCreator extends WriteCommandAction.Simple {
             boolean duplicateField = false;
             for (PsiField field : fields) {
                 String name = field.getName();
-                if (name != null && name.equals(element.fieldName)) {
+                if (name != null && name.equals(element.getFieldName())) {
                     duplicateField = true;
                     break;
                 }
@@ -123,7 +123,7 @@ public class LayoutCreator extends WriteCommandAction.Simple {
                 continue;
             }
 
-            mClass.add(mFactory.createFieldFromText("private " + element.name + " " + element.fieldName + ";", mClass));
+            mClass.add(mFactory.createFieldFromText("private " + element.name + " " + element.getFieldName() + ";", mClass));
         }
     }
 
@@ -223,7 +223,7 @@ public class LayoutCreator extends WriteCommandAction.Simple {
 
         for (Element element : mElements) {
             String pre = TextUtils.isEmpty(findPre) ? "" : findPre + ".";
-            initView.append(element.fieldName + " = (" + element.name + ") " + pre + "findViewById(" + element.getFullID() + ");\n");
+            initView.append(element.getFieldName() + " = (" + element.name + ") " + pre + "findViewById(" + element.getFullID() + ");\n");
 
             // set flag
             if (element.isEditText) {
@@ -291,7 +291,7 @@ public class LayoutCreator extends WriteCommandAction.Simple {
 
             for (Element element : clickableElements) {
                 // generator setOnClickListener code in initView()
-                initView.append(element.fieldName + ".setOnClickListener(this);\n");
+                initView.append(element.getFieldName() + ".setOnClickListener(this);\n");
 
                 // generator override public void onClick(View v) method
                 sbClickable.append("case " + element.getFullID() + " :\n\nbreak;\n");
@@ -310,11 +310,11 @@ public class LayoutCreator extends WriteCommandAction.Simple {
 
                 // append findViewById
                 String pre = TextUtils.isEmpty(findPre) ? "" : findPre + ".";
-                String s2 = element.fieldName + " = (" + element.name + ") " + pre + "findViewById(" + element.getFullID() + ");";
+                String s2 = element.getFieldName() + " = (" + element.name + ") " + pre + "findViewById(" + element.getFullID() + ");";
                 initViewMethodBody.add(mFactory.createStatementFromText(s2, initViewMethods[0]));
 
                 // append setOnClickListener
-                String s1 = element.fieldName + ".setOnClickListener(this);";
+                String s1 = element.getFieldName() + ".setOnClickListener(this);";
                 initViewMethodBody.add(mFactory.createStatementFromText(s1, initViewMethods[0]));
             }
         } else {

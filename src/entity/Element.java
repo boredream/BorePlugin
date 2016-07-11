@@ -20,6 +20,7 @@ public class Element {
     public boolean isValid = false;
     public boolean used = true;
     public boolean isClickable = false; // Button, view_having_clickable_attr etc.
+    public boolean isItemClickable = false; // ListView, GridView etc.
     public boolean isEditText = false; // EditText
     public XmlTag xml;
 
@@ -58,15 +59,22 @@ public class Element {
 
         // clickable
         XmlAttribute clickable = xml.getAttribute("android:clickable", null);
-        if (xml.getName().contains("RadioButton")) {
-            // check
-        } else if (xml.getName().contains("Button")
-                || (clickable != null && clickable.getValue() != null && clickable.getValue().equals("true"))) {
-            isClickable = true;
+        boolean hasClickable = clickable != null &&
+                clickable.getValue() != null &&
+                clickable.getValue().equals("true");
+        String xmlName = xml.getName();
+        if (xmlName.contains("RadioButton")) {
+            // TODO check
+        } else {
+            if ((xmlName.contains("ListView") || xmlName.contains("GridView")) && hasClickable) {
+                isItemClickable = true;
+            } else if (xmlName.contains("Button") || hasClickable) {
+                isClickable = true;
+            }
         }
 
         // isEditText
-        isEditText = xml.getName().contains("EditText");
+        isEditText = xmlName.contains("EditText");
     }
 
     /**

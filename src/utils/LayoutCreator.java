@@ -139,7 +139,8 @@ public class LayoutCreator extends WriteCommandAction.Simple {
 
         // Check for Activity class
         if ((activityClass != null && mClass.isInheritor(activityClass, true))
-                || (compatActivityClass != null && mClass.isInheritor(compatActivityClass, true))) {
+                || (compatActivityClass != null && mClass.isInheritor(compatActivityClass, true))
+                || mClass.getName().contains("Activity")) {
             if (mClass.findMethodsByName("onCreate", false).length == 0) {
                 // Add an empty stub of onCreate()
                 StringBuilder method = new StringBuilder();
@@ -212,6 +213,7 @@ public class LayoutCreator extends WriteCommandAction.Simple {
     private void generatorLayoutCode(String contextName, String findPre) {
         List<Element> editTextElements = new ArrayList<>();
         List<Element> clickableElements = new ArrayList<>();
+        List<Element> itemClickableElements = new ArrayList<>();
 
         // generator findViewById code in initView() method
         StringBuilder initView = new StringBuilder();
@@ -232,6 +234,9 @@ public class LayoutCreator extends WriteCommandAction.Simple {
             if (element.isClickable) {
                 clickableElements.add(element);
             }
+            if (element.isItemClickable) {
+                itemClickableElements.add(element);
+            }
         }
 
         // generator EditText validate code if need
@@ -246,13 +251,16 @@ public class LayoutCreator extends WriteCommandAction.Simple {
                 String idName = element.id;
                 int index = idName.lastIndexOf("_");
                 String name = index == -1 ? idName : idName.substring(index + 1);
+                if(name.equals(idName)) {
+                    name += "String";
+                }
 
                 sbEditText.append("String " + name + " = " + idName + ".getText().toString().trim();\n");
                 sbEditText.append("if(TextUtils.isEmpty(" + name + ")) {\n");
                 // 提示的toast为EditText的hint文字,无hint时格式为"name不能为空"
                 String emptyTint = name + "不能为空";
                 String hint = element.xml.getAttributeValue("android:hint");
-                if (!TextUtils.isEmpty(hint)) {
+                if (!TextUtils.isEmpty(hint) && !hint.startsWith("@string")) {
                     emptyTint = hint;
                 }
                 sbEditText.append("Toast.makeText(" + contextName + ", \"" + emptyTint + "\", Toast.LENGTH_SHORT).show();\n");
@@ -298,7 +306,18 @@ public class LayoutCreator extends WriteCommandAction.Simple {
             }
             sbClickable.append("}\n}");
         }
-        initView.append("}");
+
+        // generator itemClickable code if need
+        for (Element element : itemClickableElements) {
+            // generator setOnClickListener code in initView()
+            initView.append(element.getFieldName() + ".setOnItemClickListener(new AdapterView.OnItemClickListener() {\n");
+            initView.append("@Override\n");
+            initView.append("public void onItemClick(AdapterView<?> parent, View view, int position, long id) {\n\n");
+            initView.append("}\n");
+            initView.append("});\n");
+        }
+
+        initView.append("}\n");
 
         PsiMethod[] initViewMethods = mClass.findMethodsByName("initView", false);
         if (initViewMethods.length > 0 && initViewMethods[0].getBody() != null) {

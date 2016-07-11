@@ -21,13 +21,14 @@ public class EntryList extends JPanel {
     private Editor mEditor;
     private ArrayList<Element> mElements = new ArrayList<Element>();
     private ArrayList<Entry> mEntries = new ArrayList<Entry>();
-    private boolean mCreateHolder = false;
     private String mPrefix = null;
+    private JPanel contentPanel;
     private JScrollPane mScrollListPane;
     private IConfirmListener mConfirmListener;
     private ICancelListener mCancelListener;
     private JCheckBox mHolderCheck;
-    private JLabel mHolderLabel;
+    private boolean mCreateHolder = false;
+    private JCheckBox mAllCheck;
     private JButton mConfirm;
     private JButton mCancel;
 
@@ -49,7 +50,7 @@ public class EntryList extends JPanel {
     }
 
     private void addInjections() {
-        final JPanel contentPanel = new JPanel();
+        contentPanel = new JPanel();
         contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.PAGE_AXIS));
         contentPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         contentPanel.add(new EntryHeader(new EntryHeader.OnTypeSelected() {
@@ -71,6 +72,17 @@ public class EntryList extends JPanel {
         contentPanel.add(mScrollListPane);
 
         add(contentPanel, BorderLayout.CENTER);
+        refresh();
+    }
+
+    private void checkAll(boolean checked) {
+        for (Element element : mElements) {
+            element.used = checked;
+        }
+
+        contentPanel.remove(mScrollListPane);
+        mScrollListPane = getScrollListPanel();
+        contentPanel.add(mScrollListPane);
         refresh();
     }
 
@@ -97,17 +109,28 @@ public class EntryList extends JPanel {
     }
 
     private void addButtons() {
+        // create viewholder
         mHolderCheck = new JCheckBox();
         mHolderCheck.setPreferredSize(new Dimension(32, 26));
         mHolderCheck.setSelected(mCreateHolder);
         mHolderCheck.addChangeListener(new CheckHolderListener());
-
-        mHolderLabel = new JLabel();
+        JLabel mHolderLabel = new JLabel();
         mHolderLabel.setText("Create ViewHolder");
+
+        // check all
+        mAllCheck = new JCheckBox();
+        mAllCheck.setPreferredSize(new Dimension(32, 26));
+        mAllCheck.setSelected(true);
+        mAllCheck.addChangeListener(new CheckAllListener());
+        JLabel mAllLabel = new JLabel();
+        mAllLabel.setText("Check All");
 
         JPanel holderPanel = new JPanel();
         holderPanel.setLayout(new BoxLayout(holderPanel, BoxLayout.LINE_AXIS));
         holderPanel.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 10));
+        holderPanel.add(mAllCheck);
+        holderPanel.add(mAllLabel);
+        holderPanel.add(Box.createRigidArea(new Dimension(20, 0)));
         holderPanel.add(mHolderCheck);
         holderPanel.add(mHolderLabel);
         holderPanel.add(Box.createHorizontalGlue());
@@ -160,13 +183,20 @@ public class EntryList extends JPanel {
     public JButton getConfirmButton() {
         return mConfirm;
     }
-    // classes
 
-    public class CheckHolderListener implements ChangeListener {
+    private class CheckHolderListener implements ChangeListener {
 
         @Override
         public void stateChanged(ChangeEvent event) {
             mCreateHolder = mHolderCheck.isSelected();
+        }
+    }
+
+    private class CheckAllListener implements ChangeListener {
+
+        @Override
+        public void stateChanged(ChangeEvent event) {
+            checkAll(mAllCheck.isSelected());
         }
     }
 

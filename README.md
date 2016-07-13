@@ -1,19 +1,19 @@
-### [ENGLISH README](https://github.com/boredream/BorePlugin/README-EN.md)
+[*ENGLISH README*](https://github.com/boredream/BorePlugin/README-EN.md)
 
 # 目录
-[功能](https://github.com/boredream/BorePlugin#功能)  
-[安装](https://github.com/boredream/BorePlugin#安装)  
-[用法](https://github.com/boredream/BorePlugin#用法)  
-[用法截图](https://github.com/boredream/BorePlugin#用法截图)  
-[代码生成规则](https://github.com/boredream/BorePlugin#代码生成规则)  
-[历史版本](https://github.com/boredream/BorePlugin#历史版本)  
+[*功能*](https://github.com/boredream/BorePlugin#功能)  
+[*安装*](https://github.com/boredream/BorePlugin#安装)  
+[*用法*](https://github.com/boredream/BorePlugin#用法)  
+[*用法截图*](https://github.com/boredream/BorePlugin#用法截图)  
+[*代码生成规则*](https://github.com/boredream/BorePlugin#代码生成规则)  
+[*历史版本*](https://github.com/boredream/BorePlugin#历史版本)  
 
 # 功能
 可以让你在Activity/Fragment中自动生成findViewById等布局相关初始化代码<br/>
 或者在Adapter中自动生成ViewHolder代码
 > 如果你有任何新的需求或者想法意见,也可以在issue中提出~
 
-# Installion
+# 安装
 方式一. 下载项目中的jar包,通过本地disk方式导入<br/>
 方式二. 在Android Studio的插件中心搜索LayoutCreator下载安装
 

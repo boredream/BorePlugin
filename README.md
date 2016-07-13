@@ -2,7 +2,7 @@
 
 # 目录
 [功能](https://github.com/boredream/BorePlugin/README.md#功能)  
-[安装](https://github.com/boredream/BorePlugin/README.md#%E5%AE%89%E8%A3%85)  
+[Installion](https://github.com/boredream/BorePlugin/README.md#Installion)  
 [用法](https://github.com/boredream/BorePlugin/README.md#用法)  
 [用法截图](https://github.com/boredream/BorePlugin/README.md#用法截图)  
 [代码生成规则](https://github.com/boredream/BorePlugin/README.md#代码生成规则)  
@@ -13,7 +13,7 @@
 或者在Adapter中自动生成ViewHolder代码
 > 如果你有任何新的需求或者想法意见,也可以在issue中提出~
 
-# 安装
+# Installion
 方式一. 下载项目中的jar包,通过本地disk方式导入<br/>
 方式二. 在Android Studio的插件中心搜索LayoutCreator下载安装
 

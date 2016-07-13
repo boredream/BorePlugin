@@ -1,8 +1,8 @@
-[###ENGLISH README](https://github.com/boredream/BorePlugin/README-EN.md)
+### [ENGLISH README](https://github.com/boredream/BorePlugin/README-EN.md)
 
 # 目录
 [功能](https://github.com/boredream/BorePlugin/README.md#功能)  
-[安装](https://github.com/boredream/BorePlugin/README.md#安装)  
+[安装](https://github.com/boredream/BorePlugin/README.md#%E5%AE%89%E8%A3%85)  
 [用法](https://github.com/boredream/BorePlugin/README.md#用法)  
 [用法截图](https://github.com/boredream/BorePlugin/README.md#用法截图)  
 [代码生成规则](https://github.com/boredream/BorePlugin/README.md#代码生成规则)  

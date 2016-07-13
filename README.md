@@ -1,3 +1,13 @@
+[English README](https://github.com/boredream/BorePlugin/edit/master/README-ZH.md)
+
+# 目录
+[功能](https://github.com/boredream/BorePlugin/edit/master/README.md#功能)
+[安装](https://github.com/boredream/BorePlugin/edit/master/README.md#安装)
+[用法](https://github.com/boredream/BorePlugin/edit/master/README.md#用法)
+[用法截图](https://github.com/boredream/BorePlugin/edit/master/README.md#用法截图)
+[代码生成规则](https://github.com/boredream/BorePlugin/edit/master/README.md#代码生成规则)
+[历史版本](https://github.com/boredream/BorePlugin/edit/master/README.md#历史版本)
+
 # 功能
 可以让你在Activity/Fragment中自动生成findViewById等布局相关初始化代码<br/>
 或者在Adapter中自动生成ViewHolder代码

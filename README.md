@@ -1,4 +1,4 @@
-[**ENGLISH README**](https://github.com/boredream/BorePlugin/README-EN.md)
+[**ENGLISH README**](https://github.com/boredream/BorePlugin/blob/master/README_EN.md)
 
 # 目录
 [**功能**](https://github.com/boredream/BorePlugin#功能)  

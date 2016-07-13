@@ -1,47 +1,45 @@
 [**中文文档**](https://github.com/boredream/BorePlugin/blob/master/README.md)
 
 # Index
-[**Features**](https://github.com/boredream/BorePlugin#Features)  
-[**Installion**](https://github.com/boredream/BorePlugin#Installion)  
-[**用法**](https://github.com/boredream/BorePlugin#用法)  
-[**用法截图**](https://github.com/boredream/BorePlugin#用法截图)  
-[**代码生成规则**](https://github.com/boredream/BorePlugin#代码生成规则)  
-[**历史版本**](https://github.com/boredream/BorePlugin#历史版本)  
+[**Features**](https://github.com/boredream/BorePlugin/blob/master/README_EN.md#features)  
+[**Installion**](https://github.com/boredream/BorePlugin/blob/master/README_EN.md#installion)  
+[**Usage**](https://github.com/boredream/BorePlugin#usage)  
+[**Usage Screenshot**](https://github.com/boredream/BorePlugin#Usage Screenshot)  
+[**Generation Rule**](https://github.com/boredream/BorePlugin#Generation Rule)  
+[**Vertion**](https://github.com/boredream/BorePlugin#vertion)  
 
 # Features
 auto create the "findViewById", "btn_submit.setOnClickListener" etc. code in Activity/Fragment or Adapter  
 > if you have any question, you can make a issue~
 
 # Installion
-方式一. 下载项目中的jar包,通过本地disk方式导入<br/>
-方式二. 在Android Studio的插件中心搜索LayoutCreator下载安装
+Search "Layoutcreator" in Android Studio plugin repositories, then install it!
 
 
-# 用法
-1. 新建好Activity后自行编写onCreate并setContentView设置对应布局<br/>
-2. 选中layout布局,快捷键alt+Insert,然后选择LayoutCreator或者选中布局后在菜单栏中的Code中选择LayoutCreator<br/>
-3. 插件会自动遍历布局列出所有带id的控件,你可以在弹出的对话框中选择需要自动生成的控件<br/>
-4. 弹出的对话框中还可以勾选是否生成ViewHolder<br/>
-5. 选择好后Confirm确认即可
+# Usage
+1. create a Activity, then write the "onCreate" method and setContentView(R.layout.YOUR_LAYOUT)  
+2. choose the layout name, then select "Generate"-"LayoutCreator"  
+    (or select "Code" - "LayoutCreator" in Menu bar  
+3. then it will show a dialog with all views  
+4. press "Confirm" to generate code
 
 
-# 用法截图
+# Usage Screenshot
 ![image](https://github.com/boredream/BorePlugin/blob/master/screenshot/LayoutCreator.gif)
 
 
-# 代码生成规则
-1. 自动遍历目标布局中所有带id的文件, 无id的不会识别处理
-2. 控件生成的变量名默认为id名称, 可以在弹出确认框右侧的名称输入栏中自行修改
-3. 所有的Button或者带clickable=true的控件, 都会自动在代码中生成setOnClickListener相关代码
-4. 所有EditText控件, 都会在代码中生成非空判断代码, 如果为空会提示EditText的hint内容, 如果hint为空则提示xxx字符串不能为空字样, 最后会把所有输入框的验证合并到一个submit方法中
-5. 会自动识别布局中的include标签, 并读取对应布局中的控件
+# Generation Rule
+1. scan all views in layout witch only has the "id" attr  
+2. all the views will show in the dialog, then you can rename it  
+3. all the Button or the views whitch has clickable=true will generate "Clickc" code  
+4. all the EditText will generate validate code  
+5. the layout in <include> will be scaned  
 
 
-# 历史版本
-* 1.0 初始化版本
-* 1.1 添加了Fragment ViewHolder等支持
-* 1.2 添加了EditText的验证代码生成, 详细见 代码生成规则4
-* 1.3 优化了二次生成布局代码时重复问题<br/>
-    根据当前类中成员变量判断控件是否已经存在, 避免重复添加
-* 1.4 添加了全选功能<br/>
-    添加了不同的变量命名方式可供选择（匈牙利、驼峰、m驼峰）<br/>
+# Vertion
+* 1.0 init
+* 1.1 support Fragment and ViewHolder code  
+* 1.2 add EditText validate code  
+* 1.3 fix the bug: duplicate generate field  
+* 1.4 add "select/unselect all"  
+    support difference type of name  

@@ -1,12 +1,12 @@
-[*ENGLISH README*](https://github.com/boredream/BorePlugin/README-EN.md)
+[**ENGLISH README**](https://github.com/boredream/BorePlugin/README-EN.md)
 
 # 目录
-[*功能*](https://github.com/boredream/BorePlugin#功能)  
-[*安装*](https://github.com/boredream/BorePlugin#安装)  
-[*用法*](https://github.com/boredream/BorePlugin#用法)  
-[*用法截图*](https://github.com/boredream/BorePlugin#用法截图)  
-[*代码生成规则*](https://github.com/boredream/BorePlugin#代码生成规则)  
-[*历史版本*](https://github.com/boredream/BorePlugin#历史版本)  
+[**功能**](https://github.com/boredream/BorePlugin#功能)  
+[**安装**](https://github.com/boredream/BorePlugin#安装)  
+[**用法**](https://github.com/boredream/BorePlugin#用法)  
+[**用法截图**](https://github.com/boredream/BorePlugin#用法截图)  
+[**代码生成规则**](https://github.com/boredream/BorePlugin#代码生成规则)  
+[**历史版本**](https://github.com/boredream/BorePlugin#历史版本)  
 
 # 功能
 可以让你在Activity/Fragment中自动生成findViewById等布局相关初始化代码<br/>

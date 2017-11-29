@@ -25,7 +25,7 @@ Search "Layoutcreator" in Android Studio plugin repositories, then install it!
 
 
 # Usage Screenshot
-![image](https://github.com/boredream/BorePlugin/blob/master/screenshot/LayoutCreator.gif)
+![Layout Creator](http://upload-images.jianshu.io/upload_images/1513977-30cad82d6668b799.gif?imageMogr2/auto-orient/strip)
 
 
 # Generation Rule

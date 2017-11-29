@@ -28,7 +28,7 @@
 
 
 # 用法截图
-![image](https://github.com/boredream/BorePlugin/blob/master/screenshot/LayoutCreator.gif)
+![Layout Creator](http://upload-images.jianshu.io/upload_images/1513977-30cad82d6668b799.gif?imageMogr2/auto-orient/strip)
 
 
 # 代码生成规则

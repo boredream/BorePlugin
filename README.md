@@ -1,5 +1,9 @@
 [**ENGLISH README**](https://github.com/boredream/BorePlugin/blob/master/README_EN.md)
 
+[DEPRECATED] 
+请使用ButterKnife+生成插件替代。
+需要编写插件的可以参考代码。
+
 # 目录
 [**功能**](https://github.com/boredream/BorePlugin#功能)  
 [**安装**](https://github.com/boredream/BorePlugin#安装)  
